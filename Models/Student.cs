@@ -10,7 +10,7 @@ namespace DUTAdmin.Models
 {
     public class Student
     {
-
+        [Key]
         [JsonProperty(PropertyName = "studentNo")]
         public string StudentNo { get; set; }
 

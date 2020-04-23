@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DUTAdmin.Controllers
 {
-    [System.Web.Mvc.Authorize]
+    [Authorize]
     public class StudentController : Controller
     {
 #pragma warning disable 1998
@@ -28,7 +28,7 @@ namespace DUTAdmin.Controllers
             if (ModelState.IsValid)
             {
                 await DBRepository<Student>.CreateStudentAsync(item);
-                return RedirectToAction("Index");
+                return RedirectToAction("StudentDetails");
             }
             return View(item);
         }
@@ -88,10 +88,10 @@ namespace DUTAdmin.Controllers
         }
 
         [ActionName("StudentDetails")]
-        public async Task<ActionResult> StudentDetailsAsync(string studentno)
+        public async Task<ActionResult> StudentDetailsAsync()
         {
-            Student item = await DBRepository<Student>.GetStudentAsync(studentno);
-            return View(item);
+            var items = await DBRepository<Student>.GetStudentsAsync(d => d.IsActive);
+            return View(items);
         }
 
         // GET: Student

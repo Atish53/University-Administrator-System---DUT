@@ -24,6 +24,12 @@ namespace DUTAdmin
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Student", action = "CreateStudent", id = UrlParameter.Optional }
             );
+
+            routes.MapRoute(
+               name: "StudentDetails",
+               url: "{controller}/{action}/{id}",
+               defaults: new { controller = "Student", action = "StudentDetails", id = UrlParameter.Optional }
+           );
         }
     }
 }
