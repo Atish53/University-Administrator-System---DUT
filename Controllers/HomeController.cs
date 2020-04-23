@@ -27,5 +27,11 @@ namespace DUTAdmin.Controllers
 
             return View();
         }
+
+        public ActionResult CreateStudent()
+        {
+            ViewBag.Message = "Create a new student.";
+            return RedirectToAction("CreateStudent", "StudentController");
+        }
     }
 }
