@@ -49,6 +49,7 @@ namespace DUTAdmin.Controllers
         [ActionName("EditStudent")]
         public async Task<ActionResult> EditStudentAsync(string studentno)
         {
+
             if (studentno == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
