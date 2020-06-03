@@ -1,16 +1,29 @@
 ﻿@model DUTAdmin.Models.Student
 
 @{
-    ViewBag.Title = "CreateStudent";
+    ViewBag.Title = "Create";
 }
 
-<h2>CreateStudent</h2>
+<h2>Create</h2>
 
 
-@using (Html.BeginForm()) 
+@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
+    <head>
+        <style>
+            body {
+                border: 2px solid black;
+                padding: 25px;
+                background-image: url('../../Images/p3.jpeg');
+                background-repeat: no-repeat;
+                background-size: 1340px 800px;
+            }
+        </style>
+    </head>
+
+
     <div class="form-horizontal">
         <h4>Student</h4>
         <hr />
@@ -64,14 +77,6 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.StudentPhoto, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.StudentPhoto, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.StudentPhoto, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
             @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 <div class="checkbox">
@@ -81,18 +86,23 @@
             </div>
         </div>
 
+
+
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default"  />
+                <input type="submit" value="Create" class="btn btn-default" />
             </div>
         </div>
     </div>
+
 }
 
 <div>
-    @Html.ActionLink("Back to List", "StudentDetails", "Student")
+    @Html.ActionLink("Back to List", "StudentIndex")
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }
+
+

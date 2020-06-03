@@ -15,16 +15,14 @@ namespace DUTAdmin
     {
         private static readonly string DatabaseId = ConfigurationManager.AppSettings["database"];
         private static readonly string CollectionID = ConfigurationManager.AppSettings["collection"];
-        //const Client = new CosmosClient("AccountEndpoint=https://test-account.documents.azure.com:443/;AccountKey=c213asdasdefgdfgrtweaYPpgoeCsHbpRTHhxuMsTaw==;")
         private static DocumentClient Client;
 
-
-        public static async Task<T> GetStudentAsync(string studentno)
+        public static async Task<T> GetStudentAsync(string id, string category)
         {
             try
             {
 
-                Document document = await Client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, studentno), new RequestOptions { PartitionKey = new PartitionKey(studentno) });
+                Document document = await Client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, id), new RequestOptions { PartitionKey = new PartitionKey(category) });
                 return (T)(dynamic)document;
             }
             catch (DocumentClientException e)
@@ -55,34 +53,50 @@ namespace DUTAdmin
             }
             return results;
         }
+        public static async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
+        {
+            IDocumentQuery<T> query = Client.CreateDocumentQuery<T>(
+                UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionID),
+                new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true })
+                .Where(predicate)
+                .AsDocumentQuery();
+
+            List<T> results = new List<T>();
+            while (query.HasMoreResults)
+            {
+                results.AddRange(await query.ExecuteNextAsync<T>());
+            }
+
+            return results;
+        }
 
         public static async Task<Document> CreateStudentAsync(T item)
         {
             return await Client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionID), item);
         }
 
-        public static async Task<Document> UpdateStudentAsync(string studentno, T item)
+        public static async Task<Document> UpdateStudentAsync(string id, T item)
         {
-            return await Client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, studentno), item);
+            return await Client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, id), item);
         }
 
-        public static async Task DeleteStudentAsync(string studentno)
+        public static async Task DeleteStudentAsync(string id, string category)
         {
-            await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, studentno), new RequestOptions { PartitionKey = new PartitionKey(studentno) });
+            await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, id), new RequestOptions { PartitionKey = new PartitionKey(category) });
         }
 
         public static void Initialize()
         {
             Client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
             CreateDatabaseIfNotExistsAsync().Wait();
-            CreateCollectionIfNotExistsAsync("/studentno").Wait();
+            CreateCollectionIfNotExistsAsync("/category").Wait();
         }
 
         public static void Initialize(string endpoint, string authKey)
         {
             Client = new DocumentClient(new Uri(endpoint), authKey);
             CreateDatabaseIfNotExistsAsync().Wait();
-            CreateCollectionIfNotExistsAsync("/studentno").Wait();
+            CreateCollectionIfNotExistsAsync("/category").Wait();
         }
 
         public static void Teardown()
@@ -143,6 +157,4 @@ namespace DUTAdmin
             await Client.DeleteDatabaseAsync((UriFactory.CreateDatabaseUri(DatabaseId)));
         }
     }
-
-
 }

@@ -23,7 +23,7 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("CreateStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student item)
+        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student item)
         {
             if (ModelState.IsValid)
             {
@@ -36,71 +36,90 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("EditStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditStudentAsync([Bind(Include = "StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student item)
+        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student item)
         {
             if (ModelState.IsValid)
             {
                 await DBRepository<Student>.UpdateStudentAsync(item.StudentNo, item);
-                return RedirectToAction("Index");
+                return RedirectToAction("StudentIndex");
             }
             return View(item);
         }
 
         [ActionName("EditStudent")]
-        public async Task<ActionResult> EditStudentAsync(string studentno)
+        public async Task<ActionResult> EditStudentAsync(string id, string studentNo)
         {
 
-            if (studentno == null)
+            if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            Student item = await DBRepository<Student>.GetStudentAsync(studentno);
-            if (item == null)
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
+            if (student == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+
+            return View(student);
         }
 
         [ActionName("DeleteStudent")]
-        public async Task<ActionResult> DeleteStudentAsync(string studentno)
+        public async Task<ActionResult> DeleteStudentAsync(string id, string studentNo)
         {
-            if (studentno == null)
+            if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            Student item = await DBRepository<Student>.GetStudentAsync(studentno);
-            if (item == null)
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
+            if (student == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+
+            return View(student);
         }
 
         [HttpPost]
         [ActionName("DeleteStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteStudentConfirmedAsync([Bind(Include = "StudentNo")]string studentno)
+        public async Task<ActionResult> DeleteStudentConfirmedAsync([Bind(Include = "Id, StudentNo")]string id, string studentNo)
         {
-            await DBRepository<Student>.DeleteStudentAsync(studentno);
-            return RedirectToAction("Index");
+            await DBRepository<Student>.DeleteStudentAsync(id, studentNo);
+            return RedirectToAction("StudentIndex");
         }
 
         [ActionName("StudentDetails")]
-        public async Task<ActionResult> StudentDetailsAsync()
+        public async Task<ActionResult> StudentDetailsAsync(string id, string studentNo)
         {
-            var items = await DBRepository<Student>.GetStudentsAsync(d => d.IsActive);
-            return View(items);
+            await DBRepository<Student>.DeleteStudentAsync(id, studentNo);
+            return RedirectToAction("StudentIndex");
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Search(string name)
+        {
+            if ((ModelState.IsValid) && (!string.IsNullOrEmpty(name)))
+            {
+
+                var student = await DBRepository<Student>.GetStudentsAsync((a => (
+                (a.FirstName == name) || (a.LastName == name) || (a.StudentNo == name) && (a.IsActive == true))));
+
+                return View("StudentIndex", student);
+            }
+            return RedirectToAction("StudentIndex");
+
         }
 
         // GET: Student
-        public ActionResult Index()
+        [ActionName("StudentIndex")]
+        public async Task<ActionResult> IndexAsync()
         {
-            return View();
-
-
+            var student = await DBRepository<Student>.GetStudentsAsync(d => !d.IsActive || d.IsActive);
+            return View(student);
         }
+
+        Context db = new Context();
     }
 }
