@@ -18,12 +18,12 @@ namespace DUTAdmin.Model
             // Check if Container Name is null or empty  
             if (string.IsNullOrEmpty(ContainerName))
             {
-                throw new ArgumentNullException("ContainerName", "Please enter a container name");
+                throw new ArgumentNullException("ContainerName", "Container Name can't be empty");
             }
             try
             {
                 // Get azure table storage connection string.  
-                string ConnectionString = "https;AccountName=imagestre;AccountKey=NxlIbw10EPYwPll8lSGEAn6manL9mk5bharVJgjzZMDMFygKRCKu59kbgqshKOzZgeIIx8z6U6vLfdz+0fbkiw==;EndpointSuffix=core.windows.net";
+                string ConnectionString = "DefaultEndpointsProtocol=https;AccountName=starkblob;AccountKey=I6EWPemcyNjw+mjsavHFJ1niQ+HxvfDHFpkfBDDRsNkfUBETa1OhtuUHH7rgwHjA6/WOwpK/B1yJV7wZqJC8wQ==;EndpointSuffix=core.windows.net";
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConnectionString);
 
                 CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();

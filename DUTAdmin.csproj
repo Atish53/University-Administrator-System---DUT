@@ -325,6 +325,9 @@
     <Content Include="Views\Student\StudentIndex.cshtml" />
     <Content Include="Views\Student\DeleteStudent.cshtml" />
     <Content Include="Views\Student\CreateStudent.cshtml" />
+    <Content Include="Views\Home\Get.cshtml" />
+    <Content Include="Views\Home\UploadBlob.cshtml" />
+    <Content Include="Views\Home\View.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

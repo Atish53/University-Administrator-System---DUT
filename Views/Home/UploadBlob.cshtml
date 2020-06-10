@@ -1,0 +1,21 @@
+﻿
+@{
+    ViewBag.Title = "UploadBlob";
+}
+
+<h2>UploadBlob</h2>
+
+@using (Html.BeginForm("UploadBlob", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <fieldset>
+
+        <legend>Upload File</legend>
+        <ol>
+            <li>
+                <label style="margin-right:250px;">Select file </label>
+                <input type="file" name="FilePath" value="" />
+            </li>
+        </ol>
+        <input type="submit" value="Submit" />
+    </fieldset>
+}
