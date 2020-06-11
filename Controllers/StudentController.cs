@@ -12,6 +12,32 @@ namespace DUTAdmin.Controllers
     [Authorize]
     public class StudentController : Controller
     {
+        Context db = new Context();
+
+        // GET: Student
+        [ActionName("StudentIndex")]
+        public async Task<ActionResult> IndexAsync()
+        {
+            var student = await DBRepository<Student>.GetStudentsAsync(d => !d.IsActive || d.IsActive);
+            return View(student);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Search(string name)
+        {
+            if ((ModelState.IsValid) && (!string.IsNullOrEmpty(name)))
+            {
+
+                var student = await DBRepository<Student>.GetStudentsAsync((a => (
+                (a.FirstName == name) || (a.LastName == name) || (a.StudentNo == name) && (a.IsActive == true))));
+
+                return View("StudentIndex", student);
+            }
+            return RedirectToAction("StudentIndex");
+
+        }
+
+
 #pragma warning disable 1998
         [ActionName("CreateStudent")]
         public async Task<ActionResult> CreateStudentAsync()
@@ -23,27 +49,27 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("CreateStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student item)
+        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student)
         {
             if (ModelState.IsValid)
             {
-                await DBRepository<Student>.CreateStudentAsync(item);
-                return RedirectToAction("StudentDetails");
+                await DBRepository<Student>.CreateStudentAsync(student);
+                return RedirectToAction("StudentIndex");
             }
-            return View(item);
+            return View(student);
         }
 
         [HttpPost]
         [ActionName("EditStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student item)
+        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student)
         {
             if (ModelState.IsValid)
             {
-                await DBRepository<Student>.UpdateStudentAsync(item.StudentNo, item);
+                await DBRepository<Student>.UpdateStudentAsync(student.Id, student);
                 return RedirectToAction("StudentIndex");
             }
-            return View(item);
+            return View(student);
         }
 
         [ActionName("EditStudent")]
@@ -93,33 +119,11 @@ namespace DUTAdmin.Controllers
         [ActionName("StudentDetails")]
         public async Task<ActionResult> StudentDetailsAsync(string id, string studentNo)
         {
-            await DBRepository<Student>.DeleteStudentAsync(id, studentNo);
-            return RedirectToAction("StudentIndex");
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Search(string name)
-        {
-            if ((ModelState.IsValid) && (!string.IsNullOrEmpty(name)))
-            {
-
-                var student = await DBRepository<Student>.GetStudentsAsync((a => (
-                (a.FirstName == name) || (a.LastName == name) || (a.StudentNo == name) && (a.IsActive == true))));
-
-                return View("StudentIndex", student);
-            }
-            return RedirectToAction("StudentIndex");
-
-        }
-
-        // GET: Student
-        [ActionName("StudentIndex")]
-        public async Task<ActionResult> IndexAsync()
-        {
-            var student = await DBRepository<Student>.GetStudentsAsync(d => !d.IsActive || d.IsActive);
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             return View(student);
+
         }
 
-        Context db = new Context();
+       
     }
 }

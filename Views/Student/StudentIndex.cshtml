@@ -10,17 +10,6 @@
     @Html.TextBox("name")
     <input type="submit" name="submit" value="Search" style="border-bottom-color" />
 
-    <head>
-        <style>
-            body {
-                border: 2px solid black;
-                padding: 25px;
-                background-image: url('../../Images/p8.jpg');
-                background-repeat: no-repeat;
-                background-size: 1340px 780px;
-            }
-        </style>
-    </head>
 }
 
 <p>
@@ -56,40 +45,40 @@
         <th></th>
     </tr>
 
-    @foreach (var item in Model)
+    @foreach (var student in Model)
     {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.StudentNo)
+                @Html.DisplayFor(modelItem => student.StudentNo)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
+                @Html.DisplayFor(modelItem => student.FirstName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.LastName)
+                @Html.DisplayFor(modelItem => student.LastName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                @Html.DisplayFor(modelItem => student.Email)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.HomeAddress)
+                @Html.DisplayFor(modelItem => student.HomeAddress)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Mobile)
+                @Html.DisplayFor(modelItem => student.Mobile)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
+                @Html.DisplayFor(modelItem => student.IsActive)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.StudentPhoto)
+                @Html.DisplayFor(modelItem => student.StudentPhoto)
             </td>
 
 
 
             <td>
-                @Html.ActionLink("Edit", "EditStudent", new { id = item.Id, student = item.StudentNo }) |
-                @Html.ActionLink("Details", "StudentDetails", new { id = item.Id, student = item.StudentNo }) |
-                @Html.ActionLink("Delete", "DeleteStudent", new { id = item.Id, student = item.StudentNo })
+                @Html.ActionLink("Edit", "EditStudent", new { id = student.Id, studentNo = student.StudentNo }) |
+                @Html.ActionLink("Details", "StudentDetails", new { id = student.Id, studentNo = student.StudentNo }) |
+                @Html.ActionLink("Delete", "DeleteStudent", new { id = student.Id, studentNo = student.StudentNo })
             </td>
         </tr>
     }

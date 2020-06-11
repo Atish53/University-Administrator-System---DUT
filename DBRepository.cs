@@ -70,14 +70,14 @@ namespace DUTAdmin
             return results;
         }
 
-        public static async Task<Document> CreateStudentAsync(T item)
+        public static async Task<Document> CreateStudentAsync(T student)
         {
-            return await Client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionID), item);
+            return await Client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionID), student);
         }
 
-        public static async Task<Document> UpdateStudentAsync(string id, T item)
+        public static async Task<Document> UpdateStudentAsync(string id, T student)
         {
-            return await Client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, id), item);
+            return await Client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionID, id), student);
         }
 
         public static async Task DeleteStudentAsync(string id, string category)
@@ -89,14 +89,14 @@ namespace DUTAdmin
         {
             Client = new DocumentClient(new Uri(ConfigurationManager.AppSettings["endpoint"]), ConfigurationManager.AppSettings["authKey"]);
             CreateDatabaseIfNotExistsAsync().Wait();
-            CreateCollectionIfNotExistsAsync("/category").Wait();
+            CreateCollectionIfNotExistsAsync("/studentNo").Wait();
         }
 
         public static void Initialize(string endpoint, string authKey)
         {
             Client = new DocumentClient(new Uri(endpoint), authKey);
             CreateDatabaseIfNotExistsAsync().Wait();
-            CreateCollectionIfNotExistsAsync("/category").Wait();
+            CreateCollectionIfNotExistsAsync("/studentNo").Wait();
         }
 
         public static void Teardown()
