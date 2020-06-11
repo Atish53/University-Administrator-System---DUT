@@ -13,7 +13,6 @@ namespace DUTAdmin.Models
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
-
         [JsonProperty(PropertyName = "studentNo")]
         [RegularExpression(@"^[0-9]+$", ErrorMessage = "Please use numbers only")]
         [MaxLength(8)]
