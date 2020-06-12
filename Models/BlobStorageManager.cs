@@ -23,7 +23,7 @@ namespace DUTAdmin.Model
             try
             {
                 // Get azure table storage connection string.  
-                string ConnectionString = "DefaultEndpointsProtocol=https;AccountName=starkblob;AccountKey=I6EWPemcyNjw+mjsavHFJ1niQ+HxvfDHFpkfBDDRsNkfUBETa1OhtuUHH7rgwHjA6/WOwpK/B1yJV7wZqJC8wQ==;EndpointSuffix=core.windows.net";
+                string ConnectionString = "DefaultEndpointsProtocol=https;AccountName=imagestre;AccountKey=NxlIbw10EPYwPll8lSGEAn6manL9mk5bharVJgjzZMDMFygKRCKu59kbgqshKOzZgeIIx8z6U6vLfdz+0fbkiw==;EndpointSuffix=core.windows.net";
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConnectionString);
 
                 CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
