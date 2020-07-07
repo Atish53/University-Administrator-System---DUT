@@ -4,10 +4,11 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using DUTAdmin.Models;
+using DUTAdmin.ViewModels;
 using System.Net;
 using System.Threading.Tasks;
-using DUTAdmin.Model;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Azure.Storage.Blob;
 
 namespace DUTAdmin.Controllers
 {
@@ -51,14 +52,15 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("CreateStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student)
+        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student, ViewModel photo)
         {
-            if (ModelState.IsValid)
             {
-                await DBRepository<Student>.CreateStudentAsync(student);
-                return RedirectToAction("StudentIndex");
+                    var blobStorageManager = new BlobStorageManager();
+                    await blobStorageManager.UploadPhotoAsync("studentphoto", photo.FileUpload);
+                    student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", photo.FileUpload);
+                    await DBRepository<Student>.CreateStudentAsync(student);  
+                    return RedirectToAction("StudentIndex");                  
             }
-            return View(student);
         }
 
         [HttpPost]
@@ -125,20 +127,7 @@ namespace DUTAdmin.Controllers
             return View(student);
 
         }
-
-        [ActionName("Upload")]
-        public async Task<ActionResult> UploadAsync(Student student)
-        {
-            if (ModelState.IsValid)
-            {
-                if(student.StudentPhoto != null && student.StudentPhoto.ContentLength > 0)
-                {
-                    var x = new BlobStorageManager("studentphoto");
-                    await x.UploadFile("studentphoto", student.StudentPhoto);
-                }
-            }
-            return RedirectToAction("Index");
-        }
+        
 
        
     }

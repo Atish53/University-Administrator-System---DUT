@@ -5,11 +5,21 @@ using System.Linq;
 using System.Web;
 using Microsoft.Azure.Documents;
 using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace DUTAdmin.Models
+
+namespace DUTAdmin.ViewModels
 {
-    public class Student
+    public class ViewModel
     {
+        //Blob
+        public string Name { get; set; }
+        public string URI { get; set; }
+        [Required(ErrorMessage = "Please select file.")]
+        public HttpPostedFileBase FileUpload { get; set; }
+        //Cosmos
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
 
@@ -52,6 +62,7 @@ namespace DUTAdmin.Models
         [JsonProperty(PropertyName = "PhotoPath")]
         [Display(Name = "Photo Path")]
         public string StudentPhoto { get; set; }
-
+        
+        
     }
 }

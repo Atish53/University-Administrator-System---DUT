@@ -1,113 +1,190 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web;
+using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using System.IO;
-using System.Threading.Tasks;
+using DUTAdmin.ViewModels;
 
-namespace DUTAdmin.Model 
-{ 
+
+namespace DUTAdmin.Models
+{
     public class BlobStorageManager
     {
 
-        private CloudBlobContainer blobContainer;
-
-        public BlobStorageManager(string ContainerName)
+        public List<ViewModel> GetListOfBlobs(string containername)
         {
-            // Check if Container Name is null or empty  
-            if (string.IsNullOrEmpty(ContainerName))
-            {
-                throw new ArgumentNullException("ContainerName", "Container Name can't be empty");
-            }
-            try
-            {
-                // Get azure table storage connection string.  
-                string ConnectionString = "DefaultEndpointsProtocol=https;AccountName=imagestre;AccountKey=NxlIbw10EPYwPll8lSGEAn6manL9mk5bharVJgjzZMDMFygKRCKu59kbgqshKOzZgeIIx8z6U6vLfdz+0fbkiw==;EndpointSuffix=core.windows.net";
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConnectionString);
+            var container = GetBlobContainer(containername);
 
-                CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
-                blobContainer = cloudBlobClient.GetContainerReference(ContainerName);
+            var returnList = new List<ViewModel>();
 
-                // Create the container and set the permission  
-                if (blobContainer.CreateIfNotExists())
+            //check if there are any items in the container
+            if (container.ListBlobs(null, false).Count() > 0)
+            {
+                // Loop over items within the container and output the length and URI.
+                foreach (var item in container.ListBlobs(null, false))
                 {
-                    blobContainer.SetPermissions(
-                        new BlobContainerPermissions
+                    if (item.GetType() == typeof(CloudBlockBlob))
+                    {
+                        var blob = (CloudBlockBlob)item;
+
+                        returnList.Add(new ViewModel()
                         {
-                            PublicAccess = BlobContainerPublicAccessType.Blob
+                            Name = blob.Name,
+                            URI = blob.Uri.ToString()
                         }
-                    );
+                            );
+
+                    }
+                    else if (item.GetType() == typeof(CloudPageBlob))
+                    {
+                        var pageBlob = (CloudPageBlob)item;
+
+                        returnList.Add(new ViewModel()
+                        {
+                            Name = pageBlob.Name,
+                            URI = pageBlob.Uri.ToString()
+                        }
+                        );
+
+                    }
                 }
             }
-            catch (Exception ExceptionObj)
-            {
-                throw ExceptionObj;
-            }
+            return returnList;
         }
-        public string UploadFile(HttpPostedFileBase FileToUpload)
+
+
+        public async Task UploadPhotoAsync(string containername, HttpPostedFileBase file)
         {
-            string AbsoluteUri;
-            // Check HttpPostedFileBase is null or not  
-            if (FileToUpload == null || FileToUpload.ContentLength == 0)
-                return null;
+            var container = GetBlobContainer(containername);
+
+            //Get File Name
+            var fileName = Path.GetFileName(file.FileName);
+
+            // Retrieve reference to a blob named "myblob".
+            var blockBlob = container.GetBlockBlobReference(fileName);
+
+            // Create or overwrite the "myblob" blob with contents from a local file.
+            await blockBlob.UploadFromStreamAsync(file.InputStream);
+        }
+
+        //Upload photo using optimistic concurrency
+        public void UploadPhotoOptimistic(string containername, HttpPostedFileBase file)
+        {
+            var container = GetBlobContainer(containername);
+
+            //Get File Name
+            var fileName = Path.GetFileName(file.FileName);
+
+            // Retrieve reference to a blob named "myblob".
+            var blockBlob = container.GetBlockBlobReference(fileName);
+
+            //Use the etag with optimistic concurrency
+            AccessCondition accessCondition = new AccessCondition
+            {
+                IfMatchETag = blockBlob.Properties.ETag
+            };
+
             try
             {
-                string FileName = Path.GetFileName(FileToUpload.FileName);
-                CloudBlockBlob blockBlob;
-                // Create a block blob  
-                blockBlob = blobContainer.GetBlockBlobReference(FileName);
-                // Set the object's content type  
-                blockBlob.Properties.ContentType = FileToUpload.ContentType;
-                // upload to blob  
-                blockBlob.UploadFromStream(FileToUpload.InputStream);
-
-                // get file uri  
-                AbsoluteUri = blockBlob.Uri.AbsoluteUri;
+                // Create or overwrite the "myblob" blob with contents from a local file.
+                blockBlob.UploadFromStream(file.InputStream, accessCondition);
             }
-            catch (Exception ExceptionObj)
+            catch (StorageException ex)
             {
-                throw ExceptionObj;
-            }
-            return AbsoluteUri;
-        }
-        public List<string> BlobList()
-        {
-            List<string> _blobList = new List<string>();
-            foreach (IListBlobItem item in blobContainer.ListBlobs())
-            {
-                if (item.GetType() == typeof(CloudBlockBlob))
+                if (ex.RequestInformation.HttpStatusCode == (int)System.Net.HttpStatusCode.PreconditionFailed)
                 {
-                    CloudBlockBlob _blobpage = (CloudBlockBlob)item;
-                    _blobList.Add(_blobpage.Uri.AbsoluteUri.ToString());
+                    throw new Exception("Precondition failure. Blob's orignal etag no longer matches");
                 }
+                else throw;
             }
-            return _blobList;
+
         }
-        public bool DeleteBlob(string AbsoluteUri)
+
+        //Update photo using pesimistic concurrency (lease)
+        //You can only use a lease if you already have a blob created. Aquiring a lease on a new blob throws a HTTP 404 error
+        //Lease works on the following: Put Blob, Set Blob Metadata, Set Blob Properties, Delete Blob, Put Block, Put Block List, Put Page, Append Block, Copy Blob
+        public void UpdatePhotoLease(string containername, HttpPostedFileBase file)
         {
+            var container = GetBlobContainer(containername);
+
+            //Get File Name
+            var fileName = Path.GetFileName(file.FileName);
+
+            // Retrieve reference to a blob named "myblob".
+            var blockBlob = container.GetBlockBlobReference(fileName);
+
+            //Set the least period to 15 seconds
+            AccessCondition accessCondition = new AccessCondition
+            {
+                LeaseId = blockBlob.AcquireLease(TimeSpan.FromSeconds(15), null)
+            };
+
             try
             {
-                Uri uriObj = new Uri(AbsoluteUri);
-                string BlobName = Path.GetFileName(uriObj.LocalPath);
-
-                // get block blob refarence  
-                CloudBlockBlob blockBlob = blobContainer.GetBlockBlobReference(BlobName);
-
-                // delete blob from container      
-                blockBlob.Delete();
-                return true;
+                // Overwrite the "myblob" blob with contents from a local file.
+                blockBlob.UploadFromStream(file.InputStream, accessCondition);
             }
-            catch (Exception ExceptionObj)
+            catch (StorageException ex)
             {
-                throw ExceptionObj;
+                if (ex.RequestInformation.HttpStatusCode == (int)System.Net.HttpStatusCode.PreconditionFailed)
+                    throw new Exception("Precondition failure. Error with the lease.");
+                else
+                    throw;
             }
+
         }
 
-        internal Task UploadFile(string v, HttpPostedFileBase studentPhoto)
+        private static CloudBlobContainer GetBlobContainer(string containername)
         {
-            throw new NotImplementedException();
+            // Retrieve storage account from connection string.
+            var storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting("StorageConnectionString"));
+
+            // Create the blob client.
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            // Retrieve reference to a previously created container.
+            var container = blobClient.GetContainerReference(containername);
+
+            // Set the permissions so the blobs are public. 
+            BlobContainerPermissions permissions = new BlobContainerPermissions
+            {
+                PublicAccess = BlobContainerPublicAccessType.Blob
+            };
+
+            //create container if it does not exist
+            container.CreateIfNotExists();
+
+            //set permission
+            container.SetPermissions(permissions);
+
+            return container;
+        }
+
+        public string GetFileURL(string containername, HttpPostedFileBase file)
+        {
+            // Retrieve storage account from connection string.
+            var storageAccount = CloudStorageAccount.Parse(
+                CloudConfigurationManager.GetSetting("StorageConnectionString"));
+
+            // Create the blob client.
+            var blobClient = storageAccount.CreateCloudBlobClient();
+
+            //Get File Name
+            var fileName = Path.GetFileName(file.FileName);
+
+            // Retrieve reference to a previously created container.
+            var container = blobClient.GetContainerReference(containername);
+
+            // Retrieve reference to a blob named "myblob".
+            var blockBlob = container.GetBlockBlobReference(fileName);
+            string FileURL = blockBlob.Uri.AbsoluteUri;
+            return FileURL;
         }
     }
 }

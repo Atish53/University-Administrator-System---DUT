@@ -53,23 +53,7 @@ namespace DUTAdmin
             }
             return results;
         }
-        public static async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
-        {
-            IDocumentQuery<T> query = Client.CreateDocumentQuery<T>(
-                UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionID),
-                new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true })
-                .Where(predicate)
-                .AsDocumentQuery();
-
-            List<T> results = new List<T>();
-            while (query.HasMoreResults)
-            {
-                results.AddRange(await query.ExecuteNextAsync<T>());
-            }
-
-            return results;
-        }
-
+       
         public static async Task<Document> CreateStudentAsync(T student)
         {
             return await Client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionID), student);
