@@ -49,7 +49,7 @@ namespace DUTAdmin.Models
         [Display(Name = "IsActive")]
         public bool IsActive { get; set; }
 
-        [JsonProperty(PropertyName = "StudentPhoto")]
-        public string StudentPhoto { get; set; }
+        [Required(ErrorMessage = "Please select a file")]
+        public HttpPostedFileBase StudentPhoto { get; set; }
     }
 }

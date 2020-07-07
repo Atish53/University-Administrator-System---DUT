@@ -5,6 +5,7 @@ using System.Web;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace DUTAdmin.Model 
 { 
@@ -102,6 +103,11 @@ namespace DUTAdmin.Model
             {
                 throw ExceptionObj;
             }
+        }
+
+        internal Task UploadFile(string v, HttpPostedFileBase studentPhoto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

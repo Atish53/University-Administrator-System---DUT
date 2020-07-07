@@ -6,6 +6,8 @@ using System.Web.Mvc;
 using DUTAdmin.Models;
 using System.Net;
 using System.Threading.Tasks;
+using DUTAdmin.Model;
+using Azure.Storage.Blobs.Models;
 
 namespace DUTAdmin.Controllers
 {
@@ -122,6 +124,20 @@ namespace DUTAdmin.Controllers
             Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             return View(student);
 
+        }
+
+        [ActionName("Upload")]
+        public async Task<ActionResult> UploadAsync(Student student)
+        {
+            if (ModelState.IsValid)
+            {
+                if(student.StudentPhoto != null && student.StudentPhoto.ContentLength > 0)
+                {
+                    var x = new BlobStorageManager("studentphoto");
+                    await x.UploadFile("studentphoto", student.StudentPhoto);
+                }
+            }
+            return RedirectToAction("Index");
         }
 
        

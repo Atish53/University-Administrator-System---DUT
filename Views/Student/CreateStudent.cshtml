@@ -73,6 +73,16 @@
             </div>
         </div>
 
+        <div class="form-group">
+            @Html.LabelFor(Model => Model.StudentPhoto, htmlAttributes: new { @class = "control-label col-md-2"})
+            <div class="col-md-10">
+                <input type="button" value="Upload" class="btn btn-default" />
+                @Html.TextBoxFor(x => x.StudentPhoto, "", new { type = "file", @class = "form-control", AcceptVerbsAttribute = "image/gif,image/jpeg,image/png"  })
+                @Html.ValidationMessageFor(Model => Model.StudentPhoto, "", new { @class = "text-danger"})
+
+            </div>
+        </div>
+
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
