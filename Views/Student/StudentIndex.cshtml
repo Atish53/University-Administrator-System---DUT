@@ -70,15 +70,15 @@
                 @Html.DisplayFor(modelItem => student.IsActive)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => student.StudentPhoto)
+                <a href="@Html.DisplayFor(modelItem => student.StudentPhoto)">@Html.DisplayFor(modelItem => student.StudentPhoto)</a>
             </td>
 
 
 
             <td>
-                @Html.ActionLink("Edit", "EditStudent", new { id = student.Id, studentNo = student.StudentNo }) |
-                @Html.ActionLink("Details", "StudentDetails", new { id = student.Id, studentNo = student.StudentNo }) |
-                @Html.ActionLink("Delete", "DeleteStudent", new { id = student.Id, studentNo = student.StudentNo })
+                @Html.ActionLink("Edit", "EditStudent", new { id = student.Id, studentNo = student.StudentNo, studentPhoto = student.StudentPhoto }) |
+                @Html.ActionLink("Details", "StudentDetails", new { id = student.Id, studentNo = student.StudentNo, studentPhoto = student.StudentPhoto }) |
+                @Html.ActionLink("Delete", "DeleteStudent", new { id = student.Id, studentNo = student.StudentNo, studentPhoto = student.StudentPhoto })
             </td>
         </tr>
     }

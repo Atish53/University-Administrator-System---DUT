@@ -1,4 +1,4 @@
-﻿@model DUTAdmin.Models.Student
+﻿@model DUTAdmin.ViewModels.ViewModel
 
 @{
     ViewBag.Title = "Edit";
@@ -6,27 +6,19 @@
 
 <h2>Edit</h2>
 
+<div>
+    <img src="@Url.Content(Model.StudentPhoto)" alt="Sample Image" style="height:250px;width:250px;" />
+</div>
 
-@using (Html.BeginForm())
+
+@using (Html.BeginForm("EditStudent", "Student", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
-
-    <head>
-        <style>
-            body {
-                border: 2px solid black;
-                padding: 25px;
-                background-image: url('../../Images/p3.jpeg');
-                background-repeat: no-repeat;
-                background-size: 1340px 800px;
-            }
-        </style>
-    </head>
-
 
     <div class="form-horizontal">
         <h4>Student</h4>
         <hr />
+
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
 
@@ -87,15 +79,9 @@
                 </div>
             </div>
         </div>
-        <div class="form-group">
-            @Html.LabelFor(Model => Model.StudentPhoto, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.TextBoxFor(x => x.StudentPhoto, "", new { type = "file", @class = "form-control", AcceptVerbsAttribute = "image/gif,image/jpeg,image/png" })
-                @Html.ValidationMessageFor(Model => Model.StudentPhoto, "", new { @class = "text-danger" })
-                <input type="button" value="Upload" class="btn btn-default" />
 
-            </div>
-        </div>
+        
+
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">

@@ -186,5 +186,34 @@ namespace DUTAdmin.Models
             string FileURL = blockBlob.Uri.AbsoluteUri;
             return FileURL;
         }
+
+        public async Task DeleteBlob(string AbsoluteUri)
+        {
+            try
+            {
+                Uri uriObj = new Uri(AbsoluteUri);
+                string BlobName = Path.GetFileName(uriObj.LocalPath);
+
+                // Retrieve storage account from connection string.
+                var storageAccount = CloudStorageAccount.Parse(
+                 CloudConfigurationManager.GetSetting("StorageConnectionString"));
+
+                // Create the blob client.
+                var blobClient = storageAccount.CreateCloudBlobClient();
+
+                // Retrieve reference to a previously created container.
+                var container = blobClient.GetContainerReference("studentphoto");
+
+                // get block blob refarence  
+                CloudBlockBlob blockBlob = container.GetBlockBlobReference(BlobName);
+
+                // delete blob from container      
+                blockBlob.Delete();             
+            }
+            catch (Exception ExceptionObj)
+            {
+                throw ExceptionObj;
+            }
+        }
     }
 }

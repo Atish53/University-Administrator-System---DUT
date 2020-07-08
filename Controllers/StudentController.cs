@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Azure.Storage.Blob;
+using System.Web.UI.WebControls;
 
 namespace DUTAdmin.Controllers
 {
@@ -54,24 +55,40 @@ namespace DUTAdmin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student, ViewModel photo)
         {
+            if (ModelState.IsValid)
             {
                     var blobStorageManager = new BlobStorageManager();
                     await blobStorageManager.UploadPhotoAsync("studentphoto", photo.FileUpload);
-                    student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", photo.FileUpload);
-                    await DBRepository<Student>.CreateStudentAsync(student);  
-                    return RedirectToAction("StudentIndex");                  
+                    string photoPath = blobStorageManager.GetFileURL("studentphoto", photo.FileUpload);
+                    student.StudentPhoto = photoPath;
+                    
+                await DBRepository<Student>.CreateStudentAsync(student);                
             }
+            return RedirectToAction("StudentIndex");
         }
 
         [HttpPost]
         [ActionName("EditStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student)
+        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] ViewModel student)
         {
-            if (ModelState.IsValid)
+            
+            if (ModelState.IsValid) 
             {
-                await DBRepository<Student>.UpdateStudentAsync(student.Id, student);
-                return RedirectToAction("StudentIndex");
+                if (student.FileUpload != null)
+                {
+                    var blobStorageManager = new BlobStorageManager();
+                    await blobStorageManager.UploadPhotoAsync("studentphoto", student.FileUpload);
+                    string photoPath = blobStorageManager.GetFileURL("studentphoto", student.FileUpload);                 
+                    student.StudentPhoto = photoPath;
+                    await DBRepository<ViewModel>.UpdateStudentAsync(student.Id, student);
+                    return RedirectToAction("StudentIndex");
+                }
+                else
+                {
+                    await DBRepository<ViewModel>.UpdateStudentAsync(student.Id, student);
+                    return RedirectToAction("StudentIndex");
+                }                
             }
             return View(student);
         }
@@ -79,19 +96,18 @@ namespace DUTAdmin.Controllers
         [ActionName("EditStudent")]
         public async Task<ActionResult> EditStudentAsync(string id, string studentNo)
         {
-
+            ViewModel viewModel = await DBRepository<ViewModel>.GetStudentAsync(id, studentNo);
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-
-            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
-            if (student == null)
+                        
+            if (viewModel == null)
             {
                 return HttpNotFound();
             }
 
-            return View(student);
+            return View(viewModel);
         }
 
         [ActionName("DeleteStudent")]
@@ -99,8 +115,11 @@ namespace DUTAdmin.Controllers
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
+               
+                return RedirectToAction("Get");
+            } 
+            
+               
 
             Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             if (student == null)
@@ -114,8 +133,10 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("DeleteStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteStudentConfirmedAsync([Bind(Include = "Id, StudentNo")]string id, string studentNo)
+        public async Task<ActionResult> DeleteStudentConfirmedAsync([Bind(Include = "Id, StudentNo, StudentPhoto")]string id, string studentNo, string studentPhoto)
         {
+            var blobStorageManager = new BlobStorageManager();
+            await blobStorageManager.DeleteBlob(studentPhoto);
             await DBRepository<Student>.DeleteStudentAsync(id, studentNo);
             return RedirectToAction("StudentIndex");
         }

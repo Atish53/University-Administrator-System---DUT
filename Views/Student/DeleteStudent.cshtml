@@ -1,28 +1,18 @@
 ﻿@model DUTAdmin.Models.Student
-
 @{
     ViewBag.Title = "Delete";
 }
-
-
-<head>
-    <style>
-        body {
-            border: 2px solid black;
-            padding: 25px;
-            background-image: url('../../Images/p3.jpeg');
-            background-repeat: no-repeat;
-            background-size: 1340px 800px;
-        }
-    </style>
-</head>
-
 
 <h2>Delete</h2>
 
 <h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Student</h4>
+
+    <div>
+        <img src="@Url.Content(Model.StudentPhoto)" alt="Sample Image" style="height:250px;width:250px;" />
+    </div>
+
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -93,23 +83,6 @@
         </div>
     }
 
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
 
 </div>
 
