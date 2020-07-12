@@ -53,5 +53,6 @@ namespace DUTAdmin.Models
         [Display(Name = "Photo Path")]
         public string StudentPhoto { get; set; }
 
+        public string To { get; set; }
     }
 }

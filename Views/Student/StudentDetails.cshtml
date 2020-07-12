@@ -5,10 +5,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Details</h2>
+<h2>Student Details</h2>
 
 <div>
-    <h4>Student</h4>
+    <h4>Detailed view of student.</h4>
 
     <div>
         <img src="@Url.Content(Model.StudentPhoto)" alt="Sample Image" style="height:250px;width:250px;" />
@@ -73,8 +73,10 @@
     </dl>
 
 </div>
+
 <p>
     @Html.ActionLink("Edit", "EditStudent", new { id = Model.Id, studentNo = Model.StudentNo, studentPhoto = Model.StudentPhoto }) |
-    @Html.ActionLink("Back to List", "StudentIndex")|
+    @Html.ActionLink("Export", "ExportDetails", new { id = Model.Id, studentNo = Model.StudentNo, studentPhoto = Model.StudentPhoto}) |
+    @Html.ActionLink("Back to List", "StudentIndex") 
 
 </p>

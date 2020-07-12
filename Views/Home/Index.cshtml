@@ -1,79 +1,18 @@
-﻿@*
-    @{
-        ViewBag.Title = "Home Page";
-    }
-
-    <div class="jumbotron">
-        <h1>ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4">
-            <h2>Create Student</h2>
-            <p>@Html.ActionLink("Create Student", "CreateStudent", "Student")</p>
-        </div>
-        <div class="col-md-4">
-            <h2>List Students</h2>
-            <p>@Html.ActionLink("Student Details", "StudentDetails", "Student")</p>
-        </div>
-        <div class="col-md-4">
-            <h2>Edit Student</h2>
-            <p>@Html.ActionLink("Edit Student", "EditStudent", "Student")</p>
-        </div>
-        <div class="col-md-4">
-            <h2>Delete Student</h2>
-            <p>@Html.ActionLink("Delete Student", "DeleteStudent", "Student")</p>
-        </div>
-    </div>*@
-
-
-
-
-
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
-<head>
-    <style>
-        body {
-            border: 2px solid black;
-            padding: 25px;
-            background-image: url('../../Images/DUT.jpg');
-            background-repeat: no-repeat;
-            background-size: 1332px 750px;
-        }
-    </style>
-</head>
+@{
+    ViewBag.Title = "DUT Administration System";
+}
 <body>
+
     <div>
-      
+        <center><h3>Student Information</h3></center>
+
+        <center>@Html.ActionLink("Manage Student Information", "StudentIndex", "Student")</center>
+        <center>@Html.ActionLink("Export All Students", "StudentIndex", "Student")</center>
     </div>
+
 </body>
+
 </html>
-<body>
 
-        <div>
-            <center><h3>Student Information</h3></center>
-            <br />
-            <br />
-            <br />
-            <center>@Html.ActionLink("Show Student Details", "StudentIndex", "Student")</center>
-        </div>
-    </body>
-
-
-
-
-@*<html>
-    <body>
-        <div class="jumbotron">
-            <center><h3>Student Information</h3></center>
-            <br />
-            <br />
-            <br />
-            <center>@Html.ActionLink("Show Student Details", "Index", "Student")</center>
-        </div>
-    </body>
-    </html>*@

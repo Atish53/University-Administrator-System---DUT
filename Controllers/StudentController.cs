@@ -7,9 +7,14 @@ using DUTAdmin.Models;
 using DUTAdmin.ViewModels;
 using System.Net;
 using System.Threading.Tasks;
+using System.IO;
+using System.Net.Mail;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Azure.Storage.Blob;
 using System.Web.UI.WebControls;
+using Syncfusion.XlsIO;
+using System.ComponentModel.Composition.Primitives;
+using System.Web.Services.Description;
 
 namespace DUTAdmin.Controllers
 {
@@ -42,6 +47,7 @@ namespace DUTAdmin.Controllers
         }
 
 
+
 #pragma warning disable 1998
         [ActionName("CreateStudent")]
         public async Task<ActionResult> CreateStudentAsync()
@@ -57,12 +63,12 @@ namespace DUTAdmin.Controllers
         {
             if (ModelState.IsValid)
             {
-                    var blobStorageManager = new BlobStorageManager();
-                    await blobStorageManager.UploadPhotoAsync("studentphoto", photo.FileUpload);
-                    string photoPath = blobStorageManager.GetFileURL("studentphoto", photo.FileUpload);
-                    student.StudentPhoto = photoPath;
-                    
-                await DBRepository<Student>.CreateStudentAsync(student);                
+                var blobStorageManager = new BlobStorageManager();
+                await blobStorageManager.UploadPhotoAsync("studentphoto", photo.FileUpload);
+                string photoPath = blobStorageManager.GetFileURL("studentphoto", photo.FileUpload);
+                student.StudentPhoto = photoPath;
+
+                await DBRepository<Student>.CreateStudentAsync(student);
             }
             return RedirectToAction("StudentIndex");
         }
@@ -70,25 +76,13 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("EditStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] ViewModel student)
+        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student, ViewModel viewModel)
         {
-            
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
-                if (student.FileUpload != null)
-                {
-                    var blobStorageManager = new BlobStorageManager();
-                    await blobStorageManager.UploadPhotoAsync("studentphoto", student.FileUpload);
-                    string photoPath = blobStorageManager.GetFileURL("studentphoto", student.FileUpload);                 
-                    student.StudentPhoto = photoPath;
-                    await DBRepository<ViewModel>.UpdateStudentAsync(student.Id, student);
-                    return RedirectToAction("StudentIndex");
-                }
-                else
-                {
-                    await DBRepository<ViewModel>.UpdateStudentAsync(student.Id, student);
-                    return RedirectToAction("StudentIndex");
-                }                
+                student.StudentPhoto = student.StudentPhoto;
+                await DBRepository<Student>.UpdateStudentAsync(student.Id, student);
+                return RedirectToAction("StudentIndex");
             }
             return View(student);
         }
@@ -96,32 +90,29 @@ namespace DUTAdmin.Controllers
         [ActionName("EditStudent")]
         public async Task<ActionResult> EditStudentAsync(string id, string studentNo)
         {
-            ViewModel viewModel = await DBRepository<ViewModel>.GetStudentAsync(id, studentNo);
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
                         
-            if (viewModel == null)
+            if (student == null)
             {
                 return HttpNotFound();
             }
 
-            return View(viewModel);
+            return View(student);
         }
 
         [ActionName("DeleteStudent")]
         public async Task<ActionResult> DeleteStudentAsync(string id, string studentNo)
         {
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             if (id == null)
             {
-               
-                return RedirectToAction("Get");
-            } 
-            
-               
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
-            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             if (student == null)
             {
                 return HttpNotFound();
@@ -148,8 +139,113 @@ namespace DUTAdmin.Controllers
             return View(student);
 
         }
-        
 
-       
+
+
+        [ActionName("ExportDetails")]
+        public async Task<ActionResult> ExportDetails(string id, string studentNo)
+        {
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            if (student == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(student);
+        }
+
+        [HttpPost]
+        [ActionName("ExportDetails")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ExportDetails(Student student)
+        {
+            await DBRepository<Student>.GetStudentAsync(student.Id, student.StudentNo);
+            if (ModelState.IsValid)
+            {
+                
+                
+                using (ExcelEngine excelEngine = new ExcelEngine())
+                {
+                    //Instantiate the Excel application object
+                    IApplication application = excelEngine.Excel;
+
+                    //Assigns default application version
+                    application.DefaultVersion = ExcelVersion.Excel2013;
+
+                    //A new workbook is created equivalent to creating a new workbook in Excel
+                    //Create a workbook with 1 worksheet
+                    IWorkbook workbook = application.Workbooks.Create(1);
+
+                    //Access first worksheet from the workbook
+                    IWorksheet worksheet = workbook.Worksheets[0];
+
+                    //Adding Headers
+                    worksheet.Range["A1"].Text = "Student Number";
+                    worksheet.Range["B1"].Text = "First Name";
+                    worksheet.Range["C1"].Text = "Last Name";
+                    worksheet.Range["D1"].Text = "Email Address";
+                    worksheet.Range["E1"].Text = "Home Address";
+                    worksheet.Range["F1"].Text = "Mobile";
+                    worksheet.Range["G1"].Text = "Photo URI";
+                    worksheet.Range["H1"].Text = "Active Status";
+
+                    //Adding Student Information
+                    worksheet.Range["A2"].Text = student.StudentNo;
+                    worksheet.Range["B2"].Text = student.FirstName;
+                    worksheet.Range["C2"].Text = student.LastName;
+                    worksheet.Range["D2"].Text = student.Email;
+                    worksheet.Range["E2"].Text = student.HomeAddress;
+                    worksheet.Range["F2"].Text = student.Mobile;
+                    worksheet.Range["G2"].Text = student.StudentPhoto;
+                    worksheet.Range["H2"].Boolean = student.IsActive;
+
+                    //Format Columns
+                    worksheet.UsedRange.AutofitColumns();
+
+                    //Save the workbook as stream
+                    MemoryStream outputStream = new MemoryStream();
+                    outputStream.Position = 0;
+                    workbook.SaveAs(outputStream);
+
+                    MailMessage mail = new MailMessage();
+                    
+
+                    string emailTo = student.To;
+                    MailAddress from = new MailAddress("starkdev.email@gmail.com");
+                    mail.From = from;
+                    mail.Subject = "Student Information For" + " " + student.StudentNo;
+                    mail.Body = "Dear " + emailTo + ", find the attached excel document containing the student information for " + student.FirstName + " " + student.LastName + ".";
+                    mail.To.Add(emailTo);
+
+                    outputStream.Position = 0;
+                    var contentType = new System.Net.Mime.ContentType(System.Net.Mime.MediaTypeNames.Application.Octet);
+                    var studentDetailsAttachment = new Attachment(outputStream, contentType);
+                    studentDetailsAttachment.ContentDisposition.FileName = student.StudentNo + ".xlsx";
+
+                    mail.Attachments.Add(studentDetailsAttachment);
+                    mail.IsBodyHtml = false;
+                    SmtpClient smtp = new SmtpClient();
+                    smtp.Host = "smtp.gmail.com";
+                    smtp.EnableSsl = true;
+                    NetworkCredential networkCredential = new NetworkCredential("starkdev.email@gmail.com", "StarkDev19");
+                    smtp.UseDefaultCredentials = true;
+                    smtp.Credentials = networkCredential;
+                    smtp.Port = 587;
+                    smtp.Send(mail);
+
+                    mail.Dispose();
+                }
+                
+            }
+            return RedirectToAction("StudentIndex");
+        }
+
+
+
     }
 }

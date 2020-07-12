@@ -1,18 +1,20 @@
 ﻿@model DUTAdmin.Models.Student
 @{
-    ViewBag.Title = "Edit Student";
+    ViewBag.Title = "Export Student Details";
 }
 
-<h2>Edit</h2>
+<h2>Export Student Details</h2>
 
 <div>
     <img src="@Url.Content(Model.StudentPhoto)" alt="Sample Image" style="height:250px;width:250px;" />
 </div>
 
-
-@using (Html.BeginForm("EditStudent", "Student", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("ExportDetails", "Student", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
+<div>
+    <h4>Please verify that all details are correct before exporting.</h4>
+    <hr />
 
     <div class="form-horizontal">
         <h4>Student</h4>
@@ -24,48 +26,48 @@
         <div class="form-group">
             @Html.LabelFor(model => model.StudentNo, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.StudentNo, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.StudentNo, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.StudentNo, new { htmlAttributes = new { @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.StudentNo, "", new { @readonly = "readonly" })
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @readonly = "readonly" })
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @readonly = "readonly" })
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @readonly = "readonly" })
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.HomeAddress, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.HomeAddress, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.HomeAddress, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.HomeAddress, new { htmlAttributes = new { @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.HomeAddress, "", new { @readonly = "readonly" })
             </div>
         </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.Mobile, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Mobile, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Mobile, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.Mobile, new { htmlAttributes = new { @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.Mobile, "", new { @readonly = "readonly" })
             </div>
         </div>
 
@@ -74,7 +76,7 @@
             <div class="col-md-10">
                 <div class="checkbox">
                     @Html.EditorFor(model => model.IsActive)
-                    @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+                    @Html.ValidationMessageFor(model => model.IsActive, "", new { @readonly = "readonly" })
                 </div>
             </div>
         </div>
@@ -87,22 +89,26 @@
             </div>
         </div>
 
-
+        <div class="form-group">
+            @Html.LabelFor(model => model.To, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.To, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+            </div>
+        </div>
 
 
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+                <input type="submit" value="Export" class="btn btn-default" />
             </div>
         </div>
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "StudentIndex")
 </div>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+        
+ }
+<p>
+    @Html.ActionLink("Edit", "EditStudent", new { id = Model.Id, studentNo = Model.StudentNo, studentPhoto = Model.StudentPhoto }) |
+    @Html.ActionLink("Back to List", "StudentIndex")
+</p>
