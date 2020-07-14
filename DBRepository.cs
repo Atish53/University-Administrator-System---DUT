@@ -140,5 +140,7 @@ namespace DUTAdmin
         {
             await Client.DeleteDatabaseAsync((UriFactory.CreateDatabaseUri(DatabaseId)));
         }
+
+        
     }
 }
