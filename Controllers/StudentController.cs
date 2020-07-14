@@ -74,8 +74,9 @@ namespace DUTAdmin.Controllers
                 student.StudentPhoto = photoPath;
 
                 await DBRepository<Student>.CreateStudentAsync(student);
+                return RedirectToAction("StudentIndex");
             }
-            return RedirectToAction("StudentIndex");
+            return View(student);
         }
 
         [HttpPost]
@@ -141,8 +142,7 @@ namespace DUTAdmin.Controllers
                 var blobStorageManager = new BlobStorageManager();
                 await blobStorageManager.DeleteBlob(student.StudentPhoto);
                 blobStorageManager.UploadPhotoOptimistic("studentphoto", fileUpload);
-                student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", fileUpload);
-                
+                student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", fileUpload);             
 
 
                 await DBRepository<Student>.UpdateStudentAsync(student.Id, student);
