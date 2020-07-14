@@ -1,6 +1,6 @@
 ﻿@model DUTAdmin.Models.Student
 @{
-    ViewBag.Title = "Edit Student";
+    ViewBag.Title = "Edit A Student";
 }
 
 <h2>Edit</h2>
@@ -101,14 +101,10 @@
 
 <p>
     @Html.ActionLink("Update Photo", "UpdatePhoto", new { id = Model.Id, studentNo = Model.StudentNo, studentPhoto = Model.StudentPhoto }) |
-    @Html.ActionLink("Export", "ExportDetails", new { id = Model.Id, studentNo = Model.StudentNo, studentPhoto = Model.StudentPhoto }) |
     @Html.ActionLink("Back to List", "StudentIndex")
 
 </p>
 
-<div>
-    @Html.ActionLink("Back to List", "StudentIndex")
-</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

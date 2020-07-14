@@ -28,6 +28,7 @@ namespace DUTAdmin.Controllers
         [ActionName("StudentIndex")]
         public async Task<ActionResult> IndexAsync()
         {
+            //Creates An Index For Student( !d.IsActive searches and lists students with inactive status and d.IsActive searches and lists active students )
             var student = await DBRepository<Student>.GetStudentsAsync(d => !d.IsActive || d.IsActive);
             return View(student);
         }
@@ -35,11 +36,12 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         public async Task<ActionResult> Search(string name)
         {
+            //Search function.
             if ((ModelState.IsValid) && (!string.IsNullOrEmpty(name)))
             {
-
-                var student = await DBRepository<Student>.GetStudentsAsync((a => (
-                (a.FirstName == name) || (a.LastName == name) || (a.StudentNo == name) && (a.IsActive == true))));
+                //Lists all students with a matching first name, last name or student number (Required to be active in order to be returned)
+                var student = await DBRepository<Student>.GetStudentsAsync((m => (
+                (m.FirstName == name) || (m.LastName == name) || (m.StudentNo == name) && (m.IsActive == true))));
 
                 return View("StudentIndex", student);
             }
@@ -62,6 +64,7 @@ namespace DUTAdmin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive", Exclude = "To")] Student student, ViewModel photo)
         {
+            //Create Function( Uses a ViewModel to update both the Cosmos and Azure Storage databases )
             if (ModelState.IsValid)
             {
                 
@@ -71,8 +74,9 @@ namespace DUTAdmin.Controllers
                 student.StudentPhoto = photoPath;
 
                 await DBRepository<Student>.CreateStudentAsync(student);
+                return RedirectToAction("StudentIndex");
             }
-            return RedirectToAction("StudentIndex");
+            return View(student);
         }
 
         [HttpPost]
@@ -138,8 +142,7 @@ namespace DUTAdmin.Controllers
                 var blobStorageManager = new BlobStorageManager();
                 await blobStorageManager.DeleteBlob(student.StudentPhoto);
                 blobStorageManager.UploadPhotoOptimistic("studentphoto", fileUpload);
-                student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", fileUpload);
-                
+                student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", fileUpload);             
 
 
                 await DBRepository<Student>.UpdateStudentAsync(student.Id, student);
