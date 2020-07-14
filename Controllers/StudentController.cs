@@ -15,6 +15,7 @@ using System.Web.UI.WebControls;
 using Syncfusion.XlsIO;
 using System.ComponentModel.Composition.Primitives;
 using System.Web.Services.Description;
+using Microsoft.Azure.Documents;
 
 namespace DUTAdmin.Controllers
 {
@@ -59,12 +60,13 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("CreateStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student, ViewModel photo)
+        public async Task<ActionResult> CreateStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive", Exclude = "To")] Student student, ViewModel photo)
         {
             if (ModelState.IsValid)
             {
+                
                 var blobStorageManager = new BlobStorageManager();
-                await blobStorageManager.UploadPhotoAsync("studentphoto", photo.FileUpload);
+                blobStorageManager.UploadPhotoOptimistic("studentphoto", photo.FileUpload);
                 string photoPath = blobStorageManager.GetFileURL("studentphoto", photo.FileUpload);
                 student.StudentPhoto = photoPath;
 
@@ -76,7 +78,7 @@ namespace DUTAdmin.Controllers
         [HttpPost]
         [ActionName("EditStudent")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student, ViewModel viewModel)
+        public async Task<ActionResult> EditStudentAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,StudentPhoto,IsActive")] Student student)
         {
             if (ModelState.IsValid)
             {
@@ -90,17 +92,58 @@ namespace DUTAdmin.Controllers
         [ActionName("EditStudent")]
         public async Task<ActionResult> EditStudentAsync(string id, string studentNo)
         {
-            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
+            
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-                        
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
             if (student == null)
             {
                 return HttpNotFound();
             }
 
+            return View(student);
+        }
+
+        [ActionName("UpdatePhoto")]
+        public async Task<ActionResult> UpdatePhotoAsync(string id, string studentNo, string studentPhoto)
+        {
+            Student student = await DBRepository<Student>.GetStudentAsync(id, studentNo);
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            if (student == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (studentPhoto == null)
+            {
+                return HttpNotFound();
+            }
+            return View(student);
+        }
+
+        [HttpPost]
+        [ActionName("UpdatePhoto")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdatePhotoAsync([Bind(Include = "Id,StudentNo,FirstName,LastName,Email,HomeAddress,Mobile,IsActive,StudentPhoto")]Student student, HttpPostedFileBase fileUpload)
+        {
+           
+            if (ModelState.IsValid)
+            {
+                var blobStorageManager = new BlobStorageManager();
+                await blobStorageManager.DeleteBlob(student.StudentPhoto);
+                blobStorageManager.UploadPhotoOptimistic("studentphoto", fileUpload);
+                student.StudentPhoto = blobStorageManager.GetFileURL("studentphoto", fileUpload);
+                
+
+
+                await DBRepository<Student>.UpdateStudentAsync(student.Id, student);
+            }
             return View(student);
         }
 
@@ -224,7 +267,7 @@ namespace DUTAdmin.Controllers
 
                     outputStream.Position = 0;
                     var contentType = new System.Net.Mime.ContentType(System.Net.Mime.MediaTypeNames.Application.Octet);
-                    var studentDetailsAttachment = new Attachment(outputStream, contentType);
+                    var studentDetailsAttachment = new System.Net.Mail.Attachment(outputStream, contentType);
                     studentDetailsAttachment.ContentDisposition.FileName = student.StudentNo + ".xlsx";
 
                     mail.Attachments.Add(studentDetailsAttachment);

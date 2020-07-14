@@ -61,7 +61,6 @@ namespace DUTAdmin.Models
         public async Task UploadPhotoAsync(string containername, HttpPostedFileBase file)
         {
             var container = GetBlobContainer(containername);
-
             //Get File Name
             var fileName = Path.GetFileName(file.FileName);
 
