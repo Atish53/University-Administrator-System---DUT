@@ -79,6 +79,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //This Edit edits the cosmos Db information.
         [HttpPost]
         [ActionName("EditStudent")]
         [ValidateAntiForgeryToken]
@@ -93,6 +94,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //This searches for student using student number and ID and returns the values to edit.
         [ActionName("EditStudent")]
         public async Task<ActionResult> EditStudentAsync(string id, string studentNo)
         {
@@ -110,6 +112,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //Searches the Db and retrieves a string.
         [ActionName("UpdatePhoto")]
         public async Task<ActionResult> UpdatePhotoAsync(string id, string studentNo, string studentPhoto)
         {
@@ -131,6 +134,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //Updates the photo in the Azure Blob Storage.
         [HttpPost]
         [ActionName("UpdatePhoto")]
         [ValidateAntiForgeryToken]
@@ -150,6 +154,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //Retrieve and pass information through pages to navigate.
         [ActionName("DeleteStudent")]
         public async Task<ActionResult> DeleteStudentAsync(string id, string studentNo)
         {
@@ -167,6 +172,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //Deletes the information retrieved. 
         [HttpPost]
         [ActionName("DeleteStudent")]
         [ValidateAntiForgeryToken]
@@ -178,6 +184,7 @@ namespace DUTAdmin.Controllers
             return RedirectToAction("StudentIndex");
         }
 
+        //Displays selected student details.
         [ActionName("StudentDetails")]
         public async Task<ActionResult> StudentDetailsAsync(string id, string studentNo)
         {
@@ -187,7 +194,7 @@ namespace DUTAdmin.Controllers
         }
 
 
-
+        //Searches db and returns student information to export.
         [ActionName("ExportDetails")]
         public async Task<ActionResult> ExportDetails(string id, string studentNo)
         {
@@ -205,6 +212,7 @@ namespace DUTAdmin.Controllers
             return View(student);
         }
 
+        //Variation that generates excel document, saves it in memory stream and attaches the file to email.
         [HttpPost]
         [ActionName("ExportDetails")]
         [ValidateAntiForgeryToken]
@@ -283,7 +291,7 @@ namespace DUTAdmin.Controllers
                     smtp.Credentials = networkCredential;
                     smtp.Port = 587;
                     smtp.Send(mail);
-
+                    //Clean-up
                     mail.Dispose();
                 }
                 

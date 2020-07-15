@@ -54,7 +54,7 @@ namespace DUTAdmin.Models
         [Display(Name = "Photo Path")]
         public string StudentPhoto { get; set; }
 
-        [NotMapped]
+       
         public string To { get; set; }
     }
 }
